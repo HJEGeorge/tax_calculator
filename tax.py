@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
-from argparse import ArgumentParser
-from tax_methods import get_income_tax, get_ni, get_slr
 import sys
+from argparse import ArgumentParser
+
+from tax_methods import get_income_tax, get_ni, get_slr
 
 parser = ArgumentParser()
 parser.add_argument('gross', type=float, help='Gross income')

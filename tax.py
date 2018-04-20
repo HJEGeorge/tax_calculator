@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import sys
 from argparse import ArgumentParser
@@ -34,5 +35,5 @@ output.append(('Monthly Pay', total/12.))
 output.append(('Weekly Pay', total/52.))
 
 for name, money in output:
-    sys.stdout.write('{:>15}:   {:>12,.2f}\n'.format(name, money))
+    sys.stdout.write('{:>15}:   {:>12,.2f} £\n'.format(name, money))
 sys.stdout.flush()

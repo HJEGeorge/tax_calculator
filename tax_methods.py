@@ -34,8 +34,11 @@ class RateBrackets(object):
         r = np.broadcast_to(self.rates, (x.shape[0], self.rates.shape[0]))
 
         # Get amount of income between each bracket (negative if not to be taxed)
-        taxable = np.where(income[:, None] < ub, income[:, None] - lb, ub - lb)
+        taxable = np.where(x[:, None] < ub, x[:, None] - lb, ub - lb)
         tax = np.sum(taxable * r * (taxable > 0).astype(int), axis=1)
+
+        if tax.shape == (1,):
+            tax = tax[0]
         return tax
 
 IncomeTax = RateBrackets(           [11850, 46350,  150000],

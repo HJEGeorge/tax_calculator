@@ -4,7 +4,7 @@
 import sys
 from argparse import ArgumentParser
 
-from tax_methods import get_income_tax, get_ni, get_slr
+from tax_methods import IncomeTax, NationalInsurance, StudentFinance
 
 parser = ArgumentParser()
 parser.add_argument('gross', type=float, help='Gross income')
@@ -15,16 +15,17 @@ gross = args.gross
 total = gross
 output = [('Gross Income', gross)]
 
-tax = get_income_tax(gross)
-total -= tax
-output.append(('Income Tax', -tax))
+it = IncomeTax.tax(gross)
+total -= it
+print it, type(it)
+output.append(('Income Tax', -it))
 
-ni = get_ni(gross)
+ni = NationalInsurance.tax(gross)
 total -= ni
 output.append(('National Ins.', -ni))
 
 if args.student:
-    slr = get_slr(gross)
+    slr = StudentFinance.tax(gross)
     output.append(('Student Loan', -slr))
 else:
     slr = 0.

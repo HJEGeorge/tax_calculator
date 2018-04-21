@@ -2,7 +2,7 @@
 import numpy as np
 import sys
 
-class RateBrackets(object):
+class TaxBrackets(object):
     """Class to calculate the tax to be paid for some given tax scheme,
     eg. Income Tax, National Insurance, Student Finance."""
 
@@ -41,11 +41,11 @@ class RateBrackets(object):
             tax = tax[0]
         return tax
 
-IncomeTax = RateBrackets(           [11850, 46350,  150000],
-                                    [0.20,  0.40,   0.45])
+IncomeTax = TaxBrackets(        [11850, 46350,  150000],
+                                [0.20,  0.40,   0.45])
 
-NationalInsurance = RateBrackets(   [162*52,892*52],
-                                    [0.12,  0.02])
+NationalInsurance = TaxBrackets([162*52,892*52],
+                                [0.12,  0.02])
 
-StudentFinance = RateBrackets(      [25000],
-                                    [0.09])
+StudentFinance = TaxBrackets(   [25000],
+                                [0.09])

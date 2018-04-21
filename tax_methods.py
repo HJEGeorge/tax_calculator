@@ -52,6 +52,8 @@ income_tax = [[ 11850,  46350,  150000],
               [  0.20,   0.40,    0.45]]
 
 # National insurance brackets and rates
+nation_ins = [[162*52,  892*52],
+              [  0.12,    0.02]]
 
 rate_student = 0.09     # Rate of student loan repayments
 thres_student = 25000.  # Threshold before student loan repayments

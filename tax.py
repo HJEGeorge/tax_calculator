@@ -12,15 +12,15 @@ parser.add_argument('--no-student', dest='student', action='store_false', help='
 args = parser.parse_args()
 
 gross = args.gross
-total = gross
+takehome = gross
 output = [('Gross Income', ' ', gross)]
 
 it = IncomeTax.tax(gross)
-total -= it
+takehome -= it
 output.append(('Income Tax', '-', it))
 
 ni = NationalInsurance.tax(gross)
-total -= ni
+takehome -= ni
 output.append(('National Ins.', '-', ni))
 
 if args.student:
@@ -28,11 +28,11 @@ if args.student:
     output.append(('Student Loan', '-', slr))
 else:
     slr = 0.
-total -= slr
+takehome -= slr
 
-output.append(('Total', ' ', total))
-output.append(('Monthly Pay', ' ', total/12.))
-output.append(('Weekly Pay', ' ', total/52.))
+output.append(('Takehome', ' ', takehome))
+output.append(('Monthly Pay', ' ', takehome/12.))
+output.append(('Weekly Pay', ' ', takehome/52.))
 
 for name, sign, money in output:
     sys.stdout.write('{:>15}:   {}{:>12,.2f} £\n'.format(name, sign, money))

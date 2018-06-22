@@ -75,6 +75,7 @@ ax1.set_ylim([0, y_max])
 ax1.set_xlabel('Gross Income [GBP]')
 ax1.set_ylabel(y_label)
 ax1.legend(loc=legend_loc)
+ax1.grid(linestyle='-', alpha=0.2, color='k')
 
 fig.tight_layout()
 plt.show()

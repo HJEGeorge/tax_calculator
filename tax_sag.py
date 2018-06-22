@@ -9,17 +9,18 @@ from matplotlib.ticker import FuncFormatter
 from tax_methods import IncomeTax, NationalInsurance, StudentFinance
 
 parser = ArgumentParser()
-parser.add_argument('max', type=int, nargs='?', default=80000,
-                    help='Maximum gross income')
+parser.add_argument('max', type=int, nargs='?', default=80,
+                    help='Maximum gross income in thousands of £')
 parser.add_argument('--no-student', dest='student', action='store_false',
                     help='Has no student loan')
 parser.add_argument('-p', dest='percent', action='store_true',
                     help='Show percentage taxed')
 args = parser.parse_args()
 
-# x-axis
+# Set up x-axis scale
 dg = 1
-gross = np.arange(1, args.max, dg)
+x_max = args.max * 1e3
+gross = np.arange(1, x_max, dg)
 
 # Calculate taxes and student loan repayments
 it = IncomeTax.tax(gross)
@@ -55,7 +56,6 @@ if args.student:
 # Format x axes to count as 10k, 20k, 30k, ...
 gbp_formatter = FuncFormatter(lambda x, pos: '{:1.0f}k'.format(x*1e-3))
 ax1.xaxis.set_major_formatter(gbp_formatter)
-x_max = args.max
 
 if args.percent:
     # Format y axis as 10%, 20%, 30%, ...

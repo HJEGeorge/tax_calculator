@@ -31,11 +31,11 @@ else:
     sf = 0.
 
 tax = it + ni + sf
-takehome = gross - tax
+take_home = gross - tax
 
 # Convert to percentages
 if args.percent:
-    takehome *= 100./gross
+    take_home *= 100. / gross
     tax *= 100./gross
     it *= 100./gross
     ni *= 100./gross
@@ -43,7 +43,7 @@ if args.percent:
 
 # Initialise stack plot
 fig, ax1 = plt.subplots(1)
-areas = [takehome, it, ni]
+areas = [take_home, it, ni]
 
 # Set colours and labels
 labels = ['Take-Home', 'Income Tax', 'National Ins.']

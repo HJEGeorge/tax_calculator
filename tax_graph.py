@@ -70,6 +70,7 @@ else:
     y_label = 'Money [GBP]'
     legend_loc = 2
 
+# Format labels, limits, and grid lines
 ax1.yaxis.set_major_formatter(y_formatter)
 ax1.set_xlim([0, x_max])
 ax1.set_ylim([0, y_max])

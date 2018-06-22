@@ -6,7 +6,7 @@ import numpy as np
 from argparse import ArgumentParser
 from matplotlib.ticker import FuncFormatter
 
-from tax_methods import IncomeTax, NationalInsurance, StudentFinance
+from tax_tools import IncomeTax, NationalInsurance, StudentFinance
 
 parser = ArgumentParser()
 parser.add_argument('max', type=int, nargs='?', default=80,

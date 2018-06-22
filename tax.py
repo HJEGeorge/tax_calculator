@@ -4,7 +4,7 @@
 import sys
 from argparse import ArgumentParser
 
-from tax_methods import IncomeTax, NationalInsurance, StudentFinance
+from tax_tools import IncomeTax, NationalInsurance, StudentFinance
 
 parser = ArgumentParser()
 parser.add_argument('gross', type=float, help='Gross income')

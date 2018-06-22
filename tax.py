@@ -8,13 +8,13 @@ from tax_tools import IncomeTax, NationalInsurance, StudentFinance
 
 parser = ArgumentParser()
 parser.add_argument('gross', type=float,
-                    help='Gross income')
+                    help='Gross income in thousands of £')
 parser.add_argument('--no-student', dest='student', action='store_false',
                     help='Has no student loan')
 args = parser.parse_args()
 
 # Initialise variables
-gross = args.gross
+gross = args.gross * 1e3
 take_home = gross
 
 # Initialise output data

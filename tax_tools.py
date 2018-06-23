@@ -17,10 +17,12 @@ class TaxBrackets(object):
                 Must be of same length as brackets.
         """
 
+        max_int = sys.maxsize
+
         if len(brackets) != len(rates):
             raise IndexError('There must be the same bracket dividers as rates')
         self.lower_brackets = np.array(brackets)
-        self.upper_brackets = np.array(tuple(brackets[1:]) + (sys.maxint,))
+        self.upper_brackets = np.array(tuple(brackets[1:]) + (max_int,))
         self.rates = np.array(rates)
 
     def tax(self, income):

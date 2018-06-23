@@ -25,7 +25,7 @@ Passing the `--no-student` flag will exclude the calculation of student loan rep
 
 ### Prerequisites
 
-These scripts are currently compatible with Python 2.7. `numpy`, `matplotlib`, and `colorama` are required packages.
+`numpy`, `matplotlib`, and `colorama` are required packages.
 
 ## License
 

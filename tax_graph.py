@@ -20,7 +20,7 @@ args = parser.parse_args()
 # Set up x-axis scale
 dg = 1
 x_max = args.max * 1e3
-gross = np.arange(1, x_max, dg)
+gross = np.arange(0, x_max, dg)
 
 # Calculate taxes and student loan repayments
 it = IncomeTax.tax(gross)

@@ -65,7 +65,7 @@ if args.p is not None:
     pension = TaxBrackets([0], [args.p])
 elif args.P is not None:
     pension = TaxBrackets([args.P[0]*1e3], [args.P[1]])
-elif args.pension is not None:
+elif args.pension:
     pension = StatutoryPension
 
 if pension is not None:

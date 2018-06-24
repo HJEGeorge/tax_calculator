@@ -5,7 +5,7 @@ import sys
 from argparse import ArgumentParser
 from colorama import init, Fore
 
-from tax_tools import IncomeTax, NationalInsurance, StudentFinance
+from tax_tools import TaxBrackets, IncomeTax, NationalInsurance, StudentFinance, StatutoryPension
 
 # Initialise colorama
 init()
@@ -16,6 +16,13 @@ parser.add_argument('gross', type=float,
                     help='Gross income in thousands of £')
 parser.add_argument('--no-student', dest='student', action='store_false',
                     help='Has no student loan')
+parser.add_argument('--no-pension', dest='pension', action='store_false',
+                    help='Exclude auto-enrolled workplace pension')
+pension_parser = parser.add_mutually_exclusive_group()
+pension_parser.add_argument('-p', type=float, nargs=1,
+                    help='Pension rate on gross income')
+pension_parser.add_argument('-P', type=float, nargs=2,
+                    help='Pension rate above certain gross income')
 args = parser.parse_args()
 
 # Initialise variables
@@ -51,9 +58,23 @@ if args.student:
                     'amount':   slr,
                     'colour':   Fore.RED,
                     'sign':     '-'})
-else:
-    slr = 0.
-take_home -= slr
+    take_home -= slr
+
+pension = None
+if args.p is not None:
+    pension = TaxBrackets([0], [args.p])
+elif args.P is not None:
+    pension = TaxBrackets([int(args.P[0])], [args.P[1]])
+elif args.pension is not None:
+    pension = StatutoryPension
+
+if pension is not None:
+    pen = pension.tax(gross)
+    output.append({ 'title':    'Pension',
+                    'amount':   pen,
+                    'colour':   Fore.RED,
+                    'sign':     '-'})
+    take_home -= pen
 
 # Calculate take-home pay
 output.append({ 'title':    'Take-Home Pay',

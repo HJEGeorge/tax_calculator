@@ -52,3 +52,6 @@ NationalInsurance = TaxBrackets([162*52,    892*52],
 
 StudentFinance = TaxBrackets([25000],
                              [0.09])
+
+StatutoryPension = TaxBrackets([5876,   45000],
+                               [0.03,   0.0])

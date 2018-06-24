@@ -6,8 +6,9 @@ import numpy as np
 from argparse import ArgumentParser
 from matplotlib.ticker import FuncFormatter
 
-from tax_tools import IncomeTax, NationalInsurance, StudentFinance
+from tax_tools import TaxBrackets, IncomeTax, NationalInsurance, StudentFinance, StatutoryPension
 
+# Parse command line arguments
 parser = ArgumentParser()
 parser.add_argument('max', type=int, nargs='?', default=80,
                     help='Maximum gross income in thousands of £')
@@ -15,6 +16,13 @@ parser.add_argument('--no-student', dest='student', action='store_false',
                     help='Has no student loan')
 parser.add_argument('-F', dest='fraction', action='store_true',
                     help='Show percentage taxed')
+parser.add_argument('--no-pension', dest='pension', action='store_false',
+                    help='Exclude auto-enrolled workplace pension')
+pension_parser = parser.add_mutually_exclusive_group()
+pension_parser.add_argument('-p', type=float, nargs=1,
+                    help='Pension rate on gross income')
+pension_parser.add_argument('-P', type=float, nargs=2,
+                    help='Pension rate above certain gross income')
 args = parser.parse_args()
 
 # Set up x-axis scale
@@ -56,6 +64,20 @@ if args.student:
     areas.append(sf)
     labels.append('Student Loan')
     colors.append('gold')
+
+pension = None
+if args.p is not None:
+    pension = TaxBrackets([0], [args.p])
+elif args.P is not None:
+    pension = TaxBrackets([int(args.P[0])], [args.P[1]])
+elif args.pension is not None:
+    pension = StatutoryPension
+
+if pension is not None:
+    pen = pension.tax(gross)
+    areas.append(pen)
+    labels.append('Pension')
+    colors.append('silver')
 
 # Format x axes to count as 10k, 20k, 30k, ...
 gbp_formatter = FuncFormatter(lambda x, pos: '{:1.0f}k'.format(x*1e-3))

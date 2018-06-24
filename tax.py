@@ -54,7 +54,7 @@ output.append({ 'title':    'National Ins.',
 # Apply student loan repayments
 if args.student:
     slr = StudentFinance.tax(gross)
-    output.append({ 'title':    'Income Tax',
+    output.append({ 'title':    'Student Finance',
                     'amount':   slr,
                     'colour':   Fore.RED,
                     'sign':     '-'})

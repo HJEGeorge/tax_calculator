@@ -13,7 +13,7 @@ parser.add_argument('max', type=int, nargs='?', default=80,
                     help='Maximum gross income in thousands of £')
 parser.add_argument('--no-student', dest='student', action='store_false',
                     help='Has no student loan')
-parser.add_argument('-p', dest='percent', action='store_true',
+parser.add_argument('-F', dest='fraction', action='store_true',
                     help='Show percentage taxed')
 args = parser.parse_args()
 
@@ -34,7 +34,7 @@ tax = it + ni + sf
 take_home = gross - tax
 
 # Convert to percentages
-if args.percent:
+if args.fraction:
     take_home *= 100. / gross
     tax *= 100./gross
     it *= 100./gross
@@ -57,7 +57,7 @@ if args.student:
 gbp_formatter = FuncFormatter(lambda x, pos: '{:1.0f}k'.format(x*1e-3))
 ax1.xaxis.set_major_formatter(gbp_formatter)
 
-if args.percent:
+if args.fraction:
     # Format y axis as 10%, 20%, 30%, ...
     y_formatter = FuncFormatter(lambda x, pos: '{:1.0f}%'.format(x))
     y_max = 100.

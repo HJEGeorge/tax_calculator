@@ -11,17 +11,20 @@ $ ./tax.py 35
    Gross Income:       35,000.00 £
      Income Tax:   -    4,630.00 £
   National Ins.:   -    3,189.12 £
-   Student Loan:   -      900.00 £
-       Takehome:       26,280.88 £
-    Monthly Pay:        2,190.07 £
-     Weekly Pay:          505.40 £
+Student Finance:   -      900.00 £
+        Pension:   -      873.72 £
+  Take-Home Pay:       25,407.16 £
+    Monthly Pay:        2,117.26 £
+     Weekly Pay:          488.60 £
 ```
 
 Note that the argument must be given in thousands.
 
-A stack plot can be generated with the `tax_graph.py` script. The first argument is the maximum gross income to be plotted.
+A stack plot can be generated with the `tax_graph.py` script. The first argument is the maximum gross income to be plotted. Passing the `-f` option will plot the proportions of your gross income that go to certain receipts.
 
-Passing the `--no-student` flag will exclude the calculation of student loan repayments.
+For both scripts, passing the `--no-student` flag will exclude the calculation of student loan repayments.
+
+For both scripts, passing the `--no-pension` flag will exclude calculation of auto-enrolled workplace pension contributions. The `-p` flag allows you to specify a pension contribution rate on your gross income. The `-P` flag allows you to specify a minimum gross income (first argument) before you start paying a given rate (second argument).
 
 ### Prerequisites
 

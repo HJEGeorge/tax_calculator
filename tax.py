@@ -1,14 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import colorama
 import sys
 from argparse import ArgumentParser
-from colorama import init, Fore
 
 from tax_tools import TaxBrackets, IncomeTax, NationalInsurance, StudentFinance, StatutoryPension
 
-# Initialise colorama
-init()
+colorama.init()
+white = colorama.Style.RESET_ALL
+red = colorama.Fore.RED
+green = colorama.Fore.GREEN
 
 # Parse command line arguments
 parser = ArgumentParser()
@@ -32,7 +34,7 @@ take_home = gross
 # Initialise output data
 output = [{ 'title':    'Gross Income',
             'amount':   gross,
-            'colour':   Fore.GREEN,
+            'colour':   green,
             'sign':     ' '}]
 
 # Apply Income Tax
@@ -40,7 +42,7 @@ it = IncomeTax.tax(gross)
 take_home -= it
 output.append({ 'title':    'Income Tax',
                 'amount':   it,
-                'colour':   Fore.RED,
+                'colour':   red,
                 'sign':     '-'})
 
 # Apply National Insurance
@@ -48,7 +50,7 @@ ni = NationalInsurance.tax(gross)
 take_home -= ni
 output.append({ 'title':    'National Ins.',
                 'amount':   ni,
-                'colour':   Fore.RED,
+                'colour':   red,
                 'sign':     '-'})
 
 # Apply student loan repayments
@@ -56,7 +58,7 @@ if args.student:
     slr = StudentFinance.tax(gross)
     output.append({ 'title':    'Student Finance',
                     'amount':   slr,
-                    'colour':   Fore.RED,
+                    'colour':   red,
                     'sign':     '-'})
     take_home -= slr
 
@@ -72,25 +74,26 @@ if pension is not None:
     pen = pension.tax(gross)
     output.append({ 'title':    'Pension',
                     'amount':   pen,
-                    'colour':   Fore.RED,
+                    'colour':   red,
                     'sign':     '-'})
     take_home -= pen
 
 # Calculate take-home pay
 output.append({ 'title':    'Take-Home Pay',
                 'amount':   take_home,
-                'colour':   Fore.GREEN,
+                'colour':   green,
                 'sign':     ' '})
 output.append({ 'title':    'Monthly Pay',
                 'amount':   take_home / 12,
-                'colour':   Fore.GREEN,
+                'colour':   green,
                 'sign':     ' '})
 output.append({ 'title':    'Weekly Pay',
                 'amount':   take_home / 52,
-                'colour':   Fore.GREEN,
+                'colour':   green,
                 'sign':     ' '})
 
 # Print output
 for out_dict in output:
-    sys.stdout.write('{title:>15}:   {colour}{sign}{amount:>12,.2f} £{white}\n'.format(white=Fore.WHITE, **out_dict))
+    sys.stdout.write('{title:>15}:   {colour}{sign}{amount:>12,.2f} £{white}\n'.format(
+            white=white, **out_dict))
 sys.stdout.flush()

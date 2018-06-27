@@ -12,6 +12,22 @@ white = colorama.Style.RESET_ALL
 red = colorama.Fore.RED
 green = colorama.Fore.GREEN
 
+
+def output_dict(title, amount):
+    """Return a dictionary for printing a accounting details about to the console."""
+    if amount > 0:
+        sign = ' '
+        color = green
+    else:
+        sign = '-'
+        color = red
+    
+    d = {'title':   title,
+         'amount':  abs(amount),
+         'sign':    sign,
+         'color':   color}
+    return d
+
 # Parse command line arguments
 parser = ArgumentParser()
 parser.add_argument('gross', type=float,
@@ -32,35 +48,23 @@ gross = args.gross * 1e3
 take_home = gross
 
 # Initialise output data
-output = [{ 'title':    'Gross Income',
-            'amount':   gross,
-            'colour':   green,
-            'sign':     ' '}]
+output = [output_dict('Gross Income', gross)]
 
 # Apply Income Tax
 it = IncomeTax.tax(gross)
 take_home -= it
-output.append({ 'title':    'Income Tax',
-                'amount':   it,
-                'colour':   red,
-                'sign':     '-'})
+output.append(output_dict('Income Tax', -it))
 
 # Apply National Insurance
 ni = NationalInsurance.tax(gross)
 take_home -= ni
-output.append({ 'title':    'National Ins.',
-                'amount':   ni,
-                'colour':   red,
-                'sign':     '-'})
+output.append(output_dict('National Ins.', -ni))
 
 # Apply student loan repayments
 if args.student:
-    slr = StudentFinance.tax(gross)
-    output.append({ 'title':    'Student Finance',
-                    'amount':   slr,
-                    'colour':   red,
-                    'sign':     '-'})
-    take_home -= slr
+    sfe = StudentFinance.tax(gross)
+    take_home -= sfe
+    output.append(output_dict('Student Finance', -sfe))
 
 pension = None
 if args.p is not None:
@@ -72,28 +76,16 @@ elif args.pension:
 
 if pension is not None:
     pen = pension.tax(gross)
-    output.append({ 'title':    'Pension',
-                    'amount':   pen,
-                    'colour':   red,
-                    'sign':     '-'})
     take_home -= pen
+    output.append(output_dict('Pension', -pen))
 
 # Calculate take-home pay
-output.append({ 'title':    'Take-Home Pay',
-                'amount':   take_home,
-                'colour':   green,
-                'sign':     ' '})
-output.append({ 'title':    'Monthly Pay',
-                'amount':   take_home / 12,
-                'colour':   green,
-                'sign':     ' '})
-output.append({ 'title':    'Weekly Pay',
-                'amount':   take_home / 52,
-                'colour':   green,
-                'sign':     ' '})
+output.append(output_dict('Take-Home Pay', take_home))
+output.append(output_dict('Monthly Pay', take_home / 12))
+output.append(output_dict('Weekly Pay', take_home / 52))
 
 # Print output
 for out_dict in output:
-    sys.stdout.write('{title:>15}:   {colour}{sign}{amount:>12,.2f} £{white}\n'.format(
+    sys.stdout.write('{title:>15}:   {color}{sign}{amount:>12,.2f} £{white}\n'.format(
             white=white, **out_dict))
 sys.stdout.flush()

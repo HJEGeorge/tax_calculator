@@ -6,7 +6,7 @@ import numpy as np
 from argparse import ArgumentParser
 from matplotlib.ticker import FuncFormatter
 
-from tax_tools import TaxBrackets, IncomeTax, NationalInsurance, StudentFinance, StatutoryPension
+from tax_tools import TaxBracket, IncomeTax, NationalInsurance, StudentFinance, StatutoryPension
 
 # Parse command line arguments
 parser = ArgumentParser()
@@ -67,9 +67,9 @@ if args.student:
 
 pension = None
 if args.p is not None:
-    pension = TaxBrackets([0], [args.p])
+    pension = TaxBracket([0], [args.p])
 elif args.P is not None:
-    pension = TaxBrackets([args.P[0]*1e3], [args.P[1]])
+    pension = TaxBracket([args.P[0] * 1e3], [args.P[1]])
 elif args.pension:
     pension = StatutoryPension
 

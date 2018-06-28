@@ -1,22 +1,33 @@
 
 import numpy as np
 import sys
+from abc import ABCMeta, abstractmethod
 
 
-class TaxBracket(object):
-    """Class to calculate the tax to be paid for some given tax scheme,
-    eg. Income Tax, National Insurance, Student Finance."""
+class Tax(object):
+    """Abstract class to calculate income-dependent payments."""
+    
+    __metaclass__ = ABCMeta
+    
+    @abstractmethod
+    def tax(self, income):
+        """Return tax or payment for a given taxable income."""
+        pass
+
+
+class TaxBracket(Tax):
+    """Class to calculate the amount to be paid for some income-dependent payment,
+    eg. Income Tax, National Insurance, Student Finance.
+    
+    Args:
+        brackets (iterable): Lower bounds of tax brackets.
+            must be of same length as rates.
+        rates (iterable): Marginal tax rate on income above respective lower bracket bound.
+            Must be of same length as brackets.
+    """
 
     def __init__(self, brackets, rates):
-        """Construct a tax calculator.
-
-        Args:
-            brackets (Iterable): Lower bounds of tax brackets.
-                must be of same length as rates.
-            rates (Iterable): Marginal tax rate on income above respective lower bracket bound.
-                Must be of same length as brackets.
-        """
-
+        
         max_int = sys.maxsize
 
         if len(brackets) != len(rates):
@@ -42,7 +53,26 @@ class TaxBracket(object):
 
         if tax.shape == (1,):
             tax = tax[0]
+        
         return tax
+
+
+class TaxCode(Tax):
+    """Class to calculate the overall payments for a collection of income-dependent payments.
+    
+    Args:
+        tax_brackets (TaxBracket): Taxes to form the overall tax code.
+    """
+
+    def __init__(self, *tax_brackets):
+        self.tax_brackets = list(tax_brackets)
+    
+    def tax(self, income):
+        """Calculate total on a given gross income."""
+        total = 0
+        for tb in self.tax_brackets:
+            total += tb.tax(income)
+            
 
 IncomeTax = TaxBracket([11850, 46350, 150000],
                        [0.20,  0.40,   0.45])

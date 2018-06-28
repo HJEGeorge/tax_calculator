@@ -146,14 +146,21 @@ class TaxCode(Tax):
                 title='Weekly Pay', color='g', amount=take_home / 52))
         
         return output
-    
+
+
+allowance = 11850
+base_rate = 0.20
+reduce_rate = 0.50
+reduce_start = 100000
+reduce_end = reduce_start + allowance / reduce_rate
+
 IncomeTax = TaxBracket('Income Tax',
-                       [11850, 46350, 150000],
-                       [0.20,  0.40,   0.45])
+                       [allowance, 46350, reduce_start,                    reduce_end, 150000],
+                       [base_rate, 0.40,  0.40 + reduce_rate * base_rate,  0.40,       0.45])
 
 NationalInsurance = TaxBracket('National Ins.',
                                [162 * 52, 892 * 52],
-                               [0.12,      0.02])
+                               [0.12,     0.02])
 
 StudentFinance = TaxBracket('Student Finance',
                             [25000],
@@ -161,7 +168,7 @@ StudentFinance = TaxBracket('Student Finance',
 
 StatutoryPension = TaxBracket('Pension',
                               [5876, 45000],
-                              [0.03,   0.0])
+                              [0.03, 0.0])
 
 
 def generate_tax_code(student=False, stat_pension=True, private_pension=None):

@@ -67,9 +67,9 @@ if args.student:
 
 pension = None
 if args.p is not None:
-    pension = TaxBracket([0], [args.p])
+    pension = TaxBracket('Pension', [0], [args.p])
 elif args.P is not None:
-    pension = TaxBracket([args.P[0] * 1e3], [args.P[1]])
+    pension = TaxBracket('Pension', [args.P[0] * 1e3], [args.P[1]])
 elif args.pension:
     pension = StatutoryPension
 

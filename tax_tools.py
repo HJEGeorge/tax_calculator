@@ -1,4 +1,6 @@
+# -*- coding: utf-8 -*-
 
+import colorama
 import numpy as np
 import sys
 from abc import ABCMeta, abstractmethod
@@ -9,29 +11,73 @@ class Tax(object):
     
     __metaclass__ = ABCMeta
     
+    COLORS = {'g': colorama.Fore.GREEN,
+              'r': colorama.Fore.RED,
+              'w': colorama.Fore.RESET}
+    
     @abstractmethod
     def tax(self, income):
         """Return tax or payment for a given taxable income."""
         pass
-
+    
+    @abstractmethod
+    def tax_string(self, income):
+        """Return a string detailing the name and amount of each tax for a given gross income"""
+    
+    @classmethod
+    def money_string(cls, **kwargs):
+        """Return a string for console output, detailing a money amount and its title/name.
+        
+        Args:
+            **kwargs:
+        """
+        
+        if 'amount' not in kwargs:
+            kwargs['amount'] = 0
+        
+        if 'color' not in kwargs:
+            if kwargs['amount'] > 0:
+                kwargs['color'] = cls.COLORS['g']
+            else:
+                kwargs['color'] = cls.COLORS['r']
+        
+        if kwargs['color'] not in cls.COLORS.values():
+            kwargs['color'] = cls.COLORS[kwargs['color']]
+        
+        if 'sign' not in kwargs:
+            if kwargs['amount'] >= 0:
+                kwargs['sign'] = ' '
+            else:
+                kwargs['sign'] = '-'
+            
+        kwargs['abs_amount'] = abs(kwargs['amount'])
+        
+        output = '{title:>15}:   {color}{sign}{abs_amount:>12,.2f} £{white}'.format(
+                white=cls.COLORS['w'], **kwargs)
+        
+        return output
+    
 
 class TaxBracket(Tax):
     """Class to calculate the amount to be paid for some income-dependent payment,
     eg. Income Tax, National Insurance, Student Finance.
     
     Args:
+        name (str): Name of tax.
         brackets (iterable): Lower bounds of tax brackets.
-            must be of same length as rates.
+            Must be of same length as rates.
         rates (iterable): Marginal tax rate on income above respective lower bracket bound.
             Must be of same length as brackets.
     """
 
-    def __init__(self, brackets, rates):
+    def __init__(self, name, brackets, rates):
         
         max_int = sys.maxsize
 
         if len(brackets) != len(rates):
             raise IndexError('There must be the same bracket dividers as rates')
+        
+        self.name = name
         self.lower_brackets = np.array(brackets)
         self.upper_brackets = np.array(tuple(brackets[1:]) + (max_int,))
         self.rates = np.array(rates)
@@ -55,6 +101,13 @@ class TaxBracket(Tax):
             tax = tax[0]
         
         return tax
+    
+    def tax_string(self, income):
+        """Return a string with tax name and amount to be paid for a given gross income."""
+        
+        amount = self.tax(income)
+
+        return self.money_string(title=self.name, amount=-amount)
 
 
 class TaxCode(Tax):
@@ -65,7 +118,7 @@ class TaxCode(Tax):
     """
 
     def __init__(self, *tax_brackets):
-        self.tax_brackets = list(tax_brackets)
+        self.tax_brackets = tax_brackets
     
     def tax(self, income):
         """Calculate total on a given gross income."""
@@ -73,18 +126,41 @@ class TaxCode(Tax):
         total = 0
         for tb in self.tax_brackets:
             total += tb.tax(income)
+        return total
     
-
-IncomeTax = TaxBracket([11850, 46350, 150000],
+    def tax_string(self, income):
+        """Return string detailing the name and amount of each tax to be paid for an income."""
+    
+        output = self.money_string(title='Gross Income', amount=income, color='g')
+        
+        take_home = income - self.tax(income)
+        
+        for tb in self.tax_brackets:
+            output += '\n{}'.format(tb.tax_string(income))
+        
+        output += '\n{}'.format(self.money_string(
+                title='Take-Home Pay', color='g', amount=take_home))
+        output += '\n{}'.format(self.money_string(
+                title='Monthly Pay', color='g', amount=take_home / 12))
+        output += '\n{}'.format(self.money_string(
+                title='Weekly Pay', color='g', amount=take_home / 52))
+        
+        return output
+    
+IncomeTax = TaxBracket('Income Tax',
+                       [11850, 46350, 150000],
                        [0.20,  0.40,   0.45])
 
-NationalInsurance = TaxBracket([162 * 52, 892 * 52],
+NationalInsurance = TaxBracket('National Ins.',
+                               [162 * 52, 892 * 52],
                                [0.12,      0.02])
 
-StudentFinance = TaxBracket([25000],
+StudentFinance = TaxBracket('Student Finance',
+                            [25000],
                             [0.09])
 
-StatutoryPension = TaxBracket([5876, 45000],
+StatutoryPension = TaxBracket('Pension',
+                              [5876, 45000],
                               [0.03,   0.0])
 
 
@@ -119,6 +195,6 @@ def generate_tax_code(student=False, stat_pension=True, private_pension=None):
         except IndexError:
             threshold = [0]
         
-        tax_code.append(TaxBracket(rate, threshold))
+        tax_code.append(TaxBracket('Pension', rate, threshold))
 
-    return tax_code
+    return TaxCode(*tax_code)

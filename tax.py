@@ -32,10 +32,5 @@ gross = args.gross * 1e3
 
 tax_code = generate_tax_code(args.student, args.s_pension, args.p_pension)
 
-# # Print output
-# for out_dict in output:
-#     sys.stdout.write('{title:>15}:   {color}{sign}{amount:>12,.2f} £{white}\n'.format(
-#             white=white, **out_dict))
-
 sys.stdout.write(tax_code.tax_string(gross) + '\n')
 sys.stdout.flush()

@@ -10,6 +10,10 @@ class Tax(object):
     """Abstract class to calculate income-dependent payments."""
     
     __metaclass__ = ABCMeta
+
+    PERSONAL_ALLOWANCE = 11850
+    PERSONAL_ALLOWANCE_THRESHOLD = 100000
+    PERSONAL_ALLOWANCE_DEC_RATE = 0.50
     
     COLORS = {'g': colorama.Fore.GREEN,
               'r': colorama.Fore.RED,
@@ -23,6 +27,7 @@ class Tax(object):
     @abstractmethod
     def tax_string(self, income):
         """Return a string detailing the name and amount of each tax for a given gross income"""
+        pass
     
     @classmethod
     def money_string(cls, **kwargs):
@@ -56,6 +61,17 @@ class Tax(object):
                 white=cls.COLORS['w'], **kwargs)
         
         return output
+
+    @classmethod
+    def personal_allowance(cls, income):
+        """Return the personal allowance for a given gross income."""
+        
+        if income > cls.PERSONAL_ALLOWANCE_THRESHOLD + cls.PERSONAL_ALLOWANCE / cls.PERSONAL_ALLOWANCE_DEC_RATE:
+            return 0
+        elif income > cls.PERSONAL_ALLOWANCE_THRESHOLD:
+            return cls.PERSONAL_ALLOWANCE - (income - cls.PERSONAL_ALLOWANCE_THRESHOLD) * cls.PERSONAL_ALLOWANCE_DEC_RATE
+        else:
+            return cls.PERSONAL_ALLOWANCE
     
 
 class TaxBracket(Tax):
@@ -83,7 +99,7 @@ class TaxBracket(Tax):
         self.rates = np.array(rates)
 
     def tax(self, income):
-        """Calculate total tax on a given gross income."""
+        """Calculate total tax on a given income."""
 
         # Ensure we are dealing with 1D np.ndarray
         x = np.array(income).flatten()
@@ -103,7 +119,7 @@ class TaxBracket(Tax):
         return tax
     
     def tax_string(self, income):
-        """Return a string with tax name and amount to be paid for a given gross income."""
+        """Return a string with payment name and amount to be paid for a given income."""
         
         amount = self.tax(income)
 
@@ -113,50 +129,112 @@ class TaxBracket(Tax):
 class TaxCode(Tax):
     """Class to calculate the overall payments for a collection of income-dependent payments.
     
-    Args:
-        *tax_brackets: TaxBracket objects to form the overall tax code.
+    Attributes:
+        standard_taxes (Iterable): TaxBracket objects that apply to one's taxable income
+        relieving_taxes (Iterable): TaxBracket objects that apply to gross income.
+            These reduce one's taxable income.
+        gross_taxes (Iterable): TaxBracket objects that apply to gross income.
+            These do not reduce one's taxable income.
     """
 
-    def __init__(self, *tax_brackets):
-        self.tax_brackets = tax_brackets
+    def __init__(self):
+        self.standard_taxes = []
+        self.relieving_taxes = []
+        self.gross_taxes = []
     
-    def tax(self, income):
-        """Calculate total on a given gross income."""
-        
+    def add_standard_tax(self, tax):
+        self.standard_taxes.append(tax)
+
+    def add_relieving_tax(self, tax):
+        self.relieving_taxes.append(tax)
+
+    def add_gross_tax(self, tax):
+        self.gross_taxes.append(tax)
+
+    def relieving_tax(self, income):
+        """Calculate the total payments for relieving taxes for a given gross income."""
+
         total = 0
-        for tb in self.tax_brackets:
-            total += tb.tax(income)
+        for tax in self.relieving_taxes:
+            total += tax.tax(income)
+        
         return total
     
+    def standard_tax(self, income, gross=True):
+        """Calculate the total standard tax payments for a given income.
+        
+        Args:
+            income (float): Gross or taxable income, depending on gross optional argument.
+            gross (bool, opt.): If true, calculate taxable income first,
+        """
+        
+        if gross:
+            taxable_income = income - self.relieving_tax(income) - self.personal_allowance(income)
+        else:
+            taxable_income = income
+        
+        total = 0
+        for tax in self.standard_taxes:
+            total += tax.tax(taxable_income)
+        
+        return total
+    
+    def gross_tax(self, income):
+        """Calculate the total non-relievable tax payments for a given gross income."""
+        
+        total = 0
+        for tax in self.gross_taxes:
+            total += tax.tax(income)
+        
+        return total
+    
+    def tax(self, income):
+        """Calculate total tax on a given gross income."""
+
+        total = self.relieving_tax(income)
+        total += self.standard_tax(income - total - self.personal_allowance(income), gross=False)
+        total += self.gross_tax(income)
+        
+        return total
+    
+    def get_taxable_income(self, income):
+        """Calculate the taxable income for a given gross income."""
+        
+        taxable_income = income - self.relieving_tax(income) - self.personal_allowance(income)
+        
+        if taxable_income > 0:
+            return taxable_income
+        else:
+            return 0
+        
     def tax_string(self, income):
         """Return string detailing the name and amount of each tax to be paid for an income."""
     
-        output = self.money_string(title='Gross Income', amount=income, color='g')
+        taxable_income = self.get_taxable_income(income)
+        
+        output = '{}\n{}\n'.format(
+                self.money_string(title='Gross Income', amount=income, color='g'),
+                self.money_string(title='Taxable Income', amount=taxable_income, color='g'))
         
         take_home = income - self.tax(income)
         
-        for tb in self.tax_brackets:
-            output += '\n{}'.format(tb.tax_string(income))
+        for tb in self.standard_taxes:
+            output += '{}\n'.format(tb.tax_string(taxable_income))
+        for tb in self.gross_taxes:
+            output += '{}\n'.format(tb.tax_string(income))
+        for tb in self.relieving_taxes:
+            output += '{}\n'.format(tb.tax_string(income))
         
-        output += '\n{}'.format(self.money_string(
-                title='Take-Home Pay', color='g', amount=take_home))
-        output += '\n{}'.format(self.money_string(
-                title='Monthly Pay', color='g', amount=take_home / 12))
-        output += '\n{}'.format(self.money_string(
-                title='Weekly Pay', color='g', amount=take_home / 52))
+        output += '{}\n{}\n{}'.format(
+                self.money_string(title='Take-Home Pay', color='g', amount=take_home),
+                self.money_string(title='Monthly Pay', color='g', amount=take_home / 12),
+                self.money_string(title='Weekly Pay', color='g', amount=take_home / 52))
         
         return output
 
-
-allowance = 11850
-base_rate = 0.20
-reduce_rate = 0.50
-reduce_start = 100000
-reduce_end = reduce_start + allowance / reduce_rate
-
 IncomeTax = TaxBracket('Income Tax',
-                       [allowance, 46350, reduce_start,                    reduce_end, 150000],
-                       [base_rate, 0.40,  0.40 + reduce_rate * base_rate,  0.40,       0.45])
+                       [0,    34500, 150000],
+                       [0.20, 0.40,  0.45])
 
 NationalInsurance = TaxBracket('National Ins.',
                                [162 * 52, 892 * 52],
@@ -186,13 +264,16 @@ def generate_tax_code(student=False, stat_pension=True, private_pension=None):
             If private_pension is specified, Statutory Pension will be ignored.
     """
     
-    tax_code = [IncomeTax, NationalInsurance]
+    tax_code = TaxCode()
+    
+    tax_code.add_standard_tax(IncomeTax)
+    tax_code.add_gross_tax(NationalInsurance)
     
     if student:
-        tax_code.append(StudentFinance)
+        tax_code.add_gross_tax(StudentFinance)
     
     if stat_pension and private_pension is None:
-        tax_code.append(StatutoryPension)
+        tax_code.add_relieving_tax(StatutoryPension)
     
     if private_pension is not None:
         rate = [private_pension[0]]
@@ -202,6 +283,6 @@ def generate_tax_code(student=False, stat_pension=True, private_pension=None):
         except IndexError:
             threshold = [0]
         
-        tax_code.append(TaxBracket('Pension', rate, threshold))
+        tax_code.add_relieving_tax(TaxBracket('Pension', threshold, rate))
 
-    return TaxCode(*tax_code)
+    return tax_code

@@ -34,7 +34,7 @@ else:
     x_start = 0
 gross = np.arange(x_start, x_max, dg)
 
-# Calculate taxes and student loan repayments
+# Calculate standard_taxes and student loan repayments
 it = IncomeTax.tax(gross)
 ni = NationalInsurance.tax(gross)
 if args.student:

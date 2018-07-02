@@ -18,19 +18,19 @@ parser.add_argument('gross', type=float,
                     help='Gross income in thousands of £')
 parser.add_argument('--no-student', dest='student', action='store_false',
                     help='Has no student loan')
-parser.add_argument('--no-pension', dest='s_pension', action='store_false',
-                    help='Exclude auto-enrolled workplace pension')
+parser.add_argument('--no-pension', dest='pension', action='store_false',
+                    help='Exclude pension')
 pension_parser = parser.add_mutually_exclusive_group()
-pension_parser.add_argument('-p', metavar='p', type=float, nargs=1, dest='p_pension', default=None,
-                    help='Pension rate on gross income')
-pension_parser.add_argument('-P', metavar='P', type=float, nargs=2, dest='p_pension', default=None,
-                    help='Pension rate above certain gross income')
+pension_parser.add_argument('-p', metavar='p', type=float, dest='private_pension', default=None,
+                    help='Private pension rate')
+pension_parser.add_argument('-P', metavar='P', type=float, dest='statutory_pension', default=None,
+                    help='Statutory pension rate')
 args = parser.parse_args()
 
 # Initialise variables
 gross = args.gross * 1e3
 
-tax_code = generate_tax_code(args.student, args.s_pension, args.p_pension)
+tax_code = generate_tax_code(args.student, args.pension, args.statutory_pension, args.private_pension)
 
 sys.stdout.write(tax_code.tax_string(gross) + '\n')
 sys.stdout.flush()
